@@ -13,65 +13,44 @@ import './App.css';
 // const app = new Clarifai.App({
 //  apiKey: 'YOUR API KEY HERE'
 // });
-const returnClarifaiRequestOptions = (imageUrl) => {
-  // Your PAT (Personal Access Token) can be found in the Account's Security section
-  const PAT = 'e2d67b90bff04e57ac15be43e01030b6';
-  // Specify the correct user_id/app_id pairings
-  // Since you're making inferences outside your app's scope
-  const USER_ID = 'banditarmy';       
-  const APP_ID = 'my-first-application-xteaba';
-  // Change these to whatever model and image URL you want to use
-  //const MODEL_ID = 'face-detection';
-  //const MODEL_VERSION_ID = '6dc7e46bc9124c5c8824be4822abe105';    
-  const IMAGE_URL = imageUrl;
+// const returnClarifaiRequestOptions = (imageUrl) => {
+//   // Your PAT (Personal Access Token) can be found in the Account's Security section
+//   const PAT = 'e2d67b90bff04e57ac15be43e01030b6';
+//   // Specify the correct user_id/app_id pairings
+//   // Since you're making inferences outside your app's scope
+//   const USER_ID = 'banditarmy';       
+//   const APP_ID = 'my-first-application-xteaba';    
+//   const IMAGE_URL = imageUrl;
 
-  const raw = JSON.stringify({
-    "user_app_id": {
-        "user_id": USER_ID,
-        "app_id": APP_ID
-    },
-    "inputs": [
-      {
-        "data": {
-          "image": {
-            "url": IMAGE_URL
-            // "base64": IMAGE_BYTES_STRING
-          }
-        }
-      }
-    ]
-  });
-  const requestOptions = {
-      method: 'POST',
-      headers: {
-          'Accept': 'application/json',
-          'Authorization': 'Key ' + PAT
-      },
-      body: raw
-  };
+//   const raw = JSON.stringify({
+//     "user_app_id": {
+//         "user_id": USER_ID,
+//         "app_id": APP_ID
+//     },
+//     "inputs": [
+//       {
+//         "data": {
+//           "image": {
+//             "url": IMAGE_URL
+//           }
+//         }
+//       }
+//     ]
+//   });
+//   const requestOptions = {
+//       method: 'POST',
+//       headers: {
+//           'Accept': 'application/json',
+//           'Authorization': 'Key ' + PAT
+//       },
+//       body: raw
+//   };
 
-  return requestOptions;
+//   return requestOptions;
 
-}
+// }
 
-    
-
-    ///////////////////////////////////////////////////////////////////////////////////
-    // YOU DO NOT NEED TO CHANGE ANYTHING BELOW THIS LINE TO RUN THIS EXAMPLE
-    ///////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-    // NOTE: MODEL_VERSION_ID is optional, you can also call prediction with the MODEL_ID only
-    // https://api.clarifai.com/v2/models/{YOUR_MODEL_ID}/outputs
-    // this will default to the latest version_id
-
-
-class App extends Component {
-  constructor(){
-    super();
-    this.state = {
+const initialState = {
       input: '',
       imageUrl: '',
       box: {},
@@ -84,7 +63,12 @@ class App extends Component {
         entries: 0,
         joined: ''
       }
-    }
+}
+
+class App extends Component {
+  constructor(){
+    super();
+    this.state = initialState;
   }
 
 loadUser = (data) => {
@@ -122,14 +106,18 @@ onInputChange = (event) => {
 onButtonSubmit = () => {
   this.setState({imageUrl: this.state.input});
   //app.models.predict('face-detection', this.state.input)
-  fetch("https://api.clarifai.com/v2/models/" + 
-    'face-detection' + 
-    //"/versions/" + MODEL_VERSION_ID + 
-    "/outputs", 
-    returnClarifaiRequestOptions(this.state.input))
-    .then((response) => response.json())
-    .then(response => {
-      this.displayFaceBox(this.calculateFaceLocation(response))
+  // fetch("https://api.clarifai.com/v2/models/" + 'face-detection' + "/outputs", 
+  //   returnClarifaiRequestOptions(this.state.input))
+    fetch('http://localhost:3000/imageurl', {
+      method: 'post',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        input: this.state.input
+      })
+    })
+     .then((response) => response.json())
+     .then(response => {
+       this.displayFaceBox(this.calculateFaceLocation(response))
       console.log(response)
       if (response) {
           fetch('http://localhost:3000/image', {
@@ -143,7 +131,7 @@ onButtonSubmit = () => {
             .then(count => {
               this.setState(Object.assign(this.state.user, { entries: count}))
             })
-
+            .catch(console.log)
       }
         // this.displayFaceBox(this.calculateFaceLocation(response))
       })
@@ -172,11 +160,11 @@ onButtonSubmit = () => {
 
  onRouteChange = (route) => {
     if (route === 'signout') {
-    this.setState({isSignedIn: false})
-  } else if (route === 'home') {
-    this.setState({isSignedIn: true})
-  }
-  this.setState({route: route});
+      this.setState(initialState)
+    } else if (route === 'home') {
+      this.setState({isSignedIn: true})
+    }
+    this.setState({route: route});
  }
 
   render() {
