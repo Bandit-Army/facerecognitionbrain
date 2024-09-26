@@ -108,7 +108,7 @@ onButtonSubmit = () => {
   //app.models.predict('face-detection', this.state.input)
   // fetch("https://api.clarifai.com/v2/models/" + 'face-detection' + "/outputs", 
   //   returnClarifaiRequestOptions(this.state.input))
-    fetch('http://localhost:3000/imageurl', {
+    fetch('https://smart-brain-api-roml.onrender.com/imageurl', {
       method: 'post',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -120,7 +120,7 @@ onButtonSubmit = () => {
        this.displayFaceBox(this.calculateFaceLocation(response))
       console.log(response)
       if (response) {
-          fetch('http://localhost:3000/image', {
+          fetch('https://smart-brain-api-roml.onrender.com/image', {
             method: 'put',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
